@@ -116,8 +116,15 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 
 	@Override
 	public String readLine() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		String s = "";
+		
+		char c;
+		do{
+			c = (char) readFully(currentSeek, 1)[0];
+			s += c;
+		} while(c != '\n');
+		
+		return s;
 	}
 
 	@Override
@@ -142,14 +149,14 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 
 	@Override
 	public int readUnsignedByte() throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
+		byte b = readByte();
+		return (b & 0xff);
 	}
 
 	@Override
 	public int readUnsignedShort() throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
+		short b = readShort();
+		return (b & 0xff);
 	}
 
 	@Override
@@ -159,9 +166,11 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 	}
 
 	@Override
-	public void write(int b) throws IOException {
-		// TODO Auto-generated method stub
-
+	public void write(int v) throws IOException {
+		byte[] b = new byte[1];
+		b[0] = (byte) v;
+		
+		write(b, currentSeek, 1);
 	}
 
 	@Override
@@ -263,9 +272,8 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 	}
 
 	@Override
-	public void writeUTF(String arg0) throws IOException {
-		// TODO Auto-generated method stub
-
+	public void writeUTF(String s) throws IOException {
+		write(s.getBytes("UTF-8"));
 	}
 
 	public void seek(long pos) {

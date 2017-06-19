@@ -51,8 +51,9 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 
 	@Override
 	public byte readByte() throws IOException {
-		byte[] b = new byte[1];
-		readFully(b);
+		assert(Byte.BYTES == 1);
+		
+		byte[] b = readFully(1);
 		return b[0];
 	}
 
@@ -152,87 +153,113 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 	}
 
 	@Override
-	public int skipBytes(int arg0) throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
+	public int skipBytes(int n) throws IOException {
+		currentSeek += n;
+		return n;
 	}
 
 	@Override
-	public void write(int arg0) throws IOException {
+	public void write(int b) throws IOException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void write(byte[] b) throws IOException {
-		// TODO Auto-generated method stub
+		write(b, currentSeek, b.length);
+	}
+
+	@Override
+	public void write(byte[] b, int offset, int length) throws IOException {
+		write(b, offset, length);
+	}
+	
+	public void write(byte[] b, long offset, int length) throws IOException{
+		try {
+			randomcipherAccessFileManaged.write(offset, length, b);
+		} catch (IllegalBlockSizeException | BadPaddingException e) {
+			throw new IOException(e.getMessage());
+		}
+	}
+
+	@Override
+	public void writeBoolean(boolean v) throws IOException {
+		if(v){
+			writeByte(1);
+		} else {
+			writeByte(0);
+		}
+		
+	}
+
+	@Override
+	public void writeByte(int v) throws IOException {
+		writeByte((byte) v);
+	}
+
+	@Override
+	public void writeBytes(String s) throws IOException {
+		for(byte c : s.getBytes()){
+			writeChar(c);
+		}
+	}
+
+	@Override
+	public void writeChar(int v) throws IOException {
+		writeByte((byte) v);
+	}
+
+	@Override
+	public void writeChars(String s) throws IOException {
+		for(byte c : s.getBytes()){
+			writeChar(c);
+		}
+	}
+
+	@Override
+	public void writeDouble(double v) throws IOException {
+		final ByteBuffer bb = ByteBuffer.allocate(Double.BYTES);
+		bb.order(BYTE_ORDER);
+		bb.putDouble(v);
+		
+		write(bb.array());
+	}
+
+	@Override
+	public void writeFloat(float v) throws IOException {
+		final ByteBuffer bb = ByteBuffer.allocate(Float.BYTES);
+		bb.order(BYTE_ORDER);
+		bb.putFloat(v);
+		
+		write(bb.array());
+	}
+
+	@Override
+	public void writeInt(int v) throws IOException {
+		final ByteBuffer bb = ByteBuffer.allocate(Integer.BYTES);
+		bb.order(BYTE_ORDER);
+		bb.putInt(v);
+		
+		write(bb.array());
 
 	}
 
 	@Override
-	public void write(byte[] arg0, int arg1, int arg2) throws IOException {
-		// TODO Auto-generated method stub
-
+	public void writeLong(long v) throws IOException {
+		final ByteBuffer bb = ByteBuffer.allocate(Long.BYTES);
+		bb.order(BYTE_ORDER);
+		bb.putLong(v);
+		
+		write(bb.array());
 	}
 
 	@Override
-	public void writeBoolean(boolean arg0) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void writeByte(int arg0) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void writeBytes(String arg0) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void writeChar(int arg0) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void writeChars(String arg0) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void writeDouble(double arg0) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void writeFloat(float arg0) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void writeInt(int arg0) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void writeLong(long arg0) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void writeShort(int arg0) throws IOException {
-		// TODO Auto-generated method stub
-
+	public void writeShort(int v) throws IOException {
+		final ByteBuffer bb = ByteBuffer.allocate(Short.BYTES);
+		bb.order(BYTE_ORDER);
+		bb.putShort((short) v);
+		
+		write(bb.array());
 	}
 
 	@Override
@@ -242,13 +269,11 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 	}
 
 	public void seek(long pos) {
-		// TODO Auto-generated method stub
-
+		currentSeek = pos;
 	}
 
 	public long getFilePointer() {
-		// TODO Auto-generated method stub
-		return 0;
+		return currentSeek;
 	}
 
 	private ByteBuffer readInByteBuffer(int bytes) throws IOException {

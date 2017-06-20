@@ -13,6 +13,7 @@ public class RandomCipherAccessFileManaged implements Closeable{
 	
 	private final RandomChiperAccessFileBlocked randomCipherAccessFileBlocked;
 	private final int blockSize;
+	private final String mode;
 
 	public RandomCipherAccessFileManaged(File file, String mode, Cipher encryptCipher, Cipher decryptCipher,
 			int blockSize) throws FileNotFoundException {
@@ -26,9 +27,14 @@ public class RandomCipherAccessFileManaged implements Closeable{
 		randomCipherAccessFileBlocked = new RandomChiperAccessFileBlocked(file, mode, encryptCipher, decryptCipher,
 				blockSize);
 		this.blockSize = blockSize;
+		this.mode = mode;
 	}
 
 	public byte[] read(long offset, int length) throws IllegalBlockSizeException, BadPaddingException, IOException {
+		if(!mode.contains("r")){
+			throw new IllegalStateException("file not openened in read mode");
+		}
+		
 		int firstBlock = (int) (offset / blockSize);
 		int lastBlock = (int) ((offset + length) / blockSize);
 		int blockCount = lastBlock - firstBlock + 1;
@@ -46,6 +52,10 @@ public class RandomCipherAccessFileManaged implements Closeable{
 	}
 
 	public void write(long offset, int length, byte[] b) throws IllegalBlockSizeException, BadPaddingException, IOException{
+		if(!mode.contains("w")){
+			throw new IllegalStateException("file not openened in write mode");
+		}
+		
 		int firstBlock = (int) (offset / blockSize);
 		int lastBlock = (int) ((offset + length) / blockSize);
 		int blockCount = lastBlock - firstBlock + 1;

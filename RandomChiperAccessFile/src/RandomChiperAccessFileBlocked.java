@@ -19,13 +19,6 @@ public class RandomChiperAccessFileBlocked implements Closeable{
 	public RandomChiperAccessFileBlocked(File file, String mode, Cipher encryptCipher, Cipher decryptCipher,
 			int blockSize) throws FileNotFoundException {
 
-		if (encryptCipher == null && mode.contains("w")) {
-			throw new IllegalArgumentException("need encrypt cipher to write to data");
-		}
-		if (decryptCipher == null && mode.contains("r")) {
-			throw new IllegalArgumentException("need decrypt cipher to read from data");
-		}
-
 		this.randomAccessFile = new RandomAccessFile(file, mode);
 
 		try {
@@ -43,9 +36,13 @@ public class RandomChiperAccessFileBlocked implements Closeable{
 
 	public byte[] readBlocks(int firstBlock, int blockCount)
 			throws IOException, IllegalBlockSizeException, BadPaddingException {
+		
+		if(decryptCipher == null){
+			throw new IllegalStateException("no decryption cypher specified");
+		}
 
 		// Check, if enough data is there
-		if ((long) (firstBlock + blockCount + 1) * (long) blockSize - 1 > randomAccessFile.length()) {
+		if ((long) (firstBlock + blockCount) * (long) blockSize > randomAccessFile.length()) {
 			throw new IOException("try to read unallocated space");
 		}
 
@@ -62,13 +59,17 @@ public class RandomChiperAccessFileBlocked implements Closeable{
 
 	public void writeBlocks(int firstBlock, int blockCount, byte[] b)
 			throws IOException, IllegalBlockSizeException, BadPaddingException {
+		
+		if(encryptCipher == null){
+			throw new IllegalStateException("no encryption cypher specified");
+		}
 
 		if (b.length != blockCount * blockSize) {
 			throw new IllegalArgumentException("b is to small or to big");
 		}
 
 		// Check, if new space must be allocated
-		long unallocatedSpace = ((long) (firstBlock + blockCount + 1) * (long) blockSize - 1)
+		long unallocatedSpace = (long) (firstBlock + blockCount + 1) * (long) blockSize
 				- randomAccessFile.length();
 		assert (unallocatedSpace % blockSize == 0);
 		if (unallocatedSpace > 0) {
@@ -87,6 +88,10 @@ public class RandomChiperAccessFileBlocked implements Closeable{
 	}
 
 	public void allocBlocks(int blocks) throws IOException, IllegalBlockSizeException, BadPaddingException {
+		if(encryptCipher == null){
+			throw new IllegalStateException("no encryption cypher specified");
+		}
+		
 		// alloc data
 		byte[] b = new byte[blocks * blockSize];
 

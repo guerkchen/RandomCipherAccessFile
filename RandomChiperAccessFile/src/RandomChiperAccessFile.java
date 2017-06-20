@@ -31,6 +31,8 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 
 		randomcipherAccessFileManaged = new RandomCipherAccessFileManaged(file, mode, encryptCipher, decryptCipher,
 				MIN_SIZE_FOR_CRYPTION);
+		
+		currentSeek = 0;
 	}
 
 	public RandomChiperAccessFile(String file, String mode, Cipher encryptCipher, Cipher decryptCipher)
@@ -50,9 +52,7 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 	}
 
 	@Override
-	public byte readByte() throws IOException {
-		assert(Byte.BYTES == 1);
-		
+	public byte readByte() throws IOException {		
 		byte[] b = readFully(1);
 		return b[0];
 	}
@@ -101,7 +101,9 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 
 	public byte[] readFully(long offset, int length) throws IOException {
 		try {
-			return randomcipherAccessFileManaged.read(offset, length);
+			byte[] b =  randomcipherAccessFileManaged.read(offset, length);
+			currentSeek += length;
+			return b;
 		} catch (IllegalBlockSizeException | BadPaddingException e) {
 			throw new IOException(e.getMessage());
 		}
@@ -143,8 +145,7 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 
 	@Override
 	public String readUTF() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new IllegalStateException("Not implemented yet");
 	}
 
 	@Override
@@ -186,6 +187,7 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 	public void write(byte[] b, long offset, int length) throws IOException{
 		try {
 			randomcipherAccessFileManaged.write(offset, length, b);
+			currentSeek += length;
 		} catch (IllegalBlockSizeException | BadPaddingException e) {
 			throw new IOException(e.getMessage());
 		}
@@ -198,7 +200,6 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 		} else {
 			writeByte(0);
 		}
-		
 	}
 
 	@Override

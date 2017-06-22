@@ -63,6 +63,10 @@ public class RandomCipherAccessFileManaged implements Closeable{
 		int offsetBegin = (int) (offset % blockSize);
 		if(offsetBegin != 0){
 			// padding at the begin
+			if(firstBlock + 1 > randomCipherAccessFileBlocked.allocatedBlocks()){
+				randomCipherAccessFileBlocked.allocBlocks(firstBlock - randomCipherAccessFileBlocked.allocatedBlocks() + 1);
+			}
+			
 			byte[] firstBlockBytes = randomCipherAccessFileBlocked.readBlocks(firstBlock, 1);
 			b = concat(Arrays.copyOfRange(firstBlockBytes, 0, offsetBegin), b);
 		}
@@ -70,14 +74,18 @@ public class RandomCipherAccessFileManaged implements Closeable{
 		int offsetEnd = (offsetBegin + length) % blockSize;
 		if(offsetEnd != 0){
 			// padding at the end
+			if(lastBlock + 1 > randomCipherAccessFileBlocked.allocatedBlocks()){
+				randomCipherAccessFileBlocked.allocBlocks(lastBlock - randomCipherAccessFileBlocked.allocatedBlocks() + 1);
+			}
+			
 			byte[] lastBlockBytes = randomCipherAccessFileBlocked.readBlocks(lastBlock, 1);
-			b = concat(b, Arrays.copyOfRange(lastBlockBytes, offsetEnd, blockSize - offsetEnd));
+			b = concat(b, Arrays.copyOfRange(lastBlockBytes, offsetEnd, blockSize));
 		}
 		
 		randomCipherAccessFileBlocked.writeBlocks(firstBlock, blockCount, b);		
 	}
 
-	public byte[] concat(byte[] a, byte[] b) {
+	private byte[] concat(byte[] a, byte[] b) {
 		int aLen = a.length;
 		int bLen = b.length;
 		byte[] c = new byte[aLen + bLen];

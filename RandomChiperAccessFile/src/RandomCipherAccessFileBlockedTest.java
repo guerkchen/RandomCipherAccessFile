@@ -10,7 +10,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.junit.Test;
 
-public class RandomCipherAccessFileBlockedTest {
+class RandomCipherAccessFileBlockedTest {
 
 	@Test
 	public void readWriteTest() {

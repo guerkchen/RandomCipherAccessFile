@@ -9,7 +9,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.junit.Test;
 
-public class RandomCipherAccessFileManagedTest {
+class RandomCipherAccessFileManagedTest {
 
 	@Test
 	public void readWriteTest() {

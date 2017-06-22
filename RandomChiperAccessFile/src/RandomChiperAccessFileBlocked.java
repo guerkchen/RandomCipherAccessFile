@@ -8,7 +8,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 
-public class RandomChiperAccessFileBlocked implements Closeable{
+class RandomChiperAccessFileBlocked implements Closeable{
 
 	
 	private final RandomAccessFile randomAccessFile;

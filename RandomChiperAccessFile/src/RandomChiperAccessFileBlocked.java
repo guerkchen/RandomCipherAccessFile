@@ -9,7 +9,12 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 
 class RandomChiperAccessFileBlocked implements Closeable{
-
+	/*
+	 * Layer 0: Direct Access to the file (through RandomAccessFile)
+	 * This class does the cryptographic stuff
+	 * This class just allows read/write of blocks, which can be encrypted/decrypted independent from the rest of the data
+	 * This class won't check, if the mode (r/w) is correct
+	 */
 	
 	private final RandomAccessFile randomAccessFile;
 	private final Cipher encryptCipher; // verschluesseln

@@ -19,7 +19,15 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 	RandomCipherAccessFileManaged randomcipherAccessFileManaged;
 
 	private long currentSeek;
-
+	
+	/**
+	 * Creates a random access file stream to read from, and optionally to write to, the file specified by the File argument.
+	 * @param file The file to be open (will be created if not found and write mode)
+	 * @param mode set read/write mode ('r', 'w', 'rw')
+	 * @param encryptCipher the cypher to encrypt the data
+	 * @param decryptCipher the cypher to decrypt the data
+	 * @throws FileNotFoundException if mode 'r' but no file found
+	 */
 	public RandomChiperAccessFile(File file, String mode, Cipher encryptCipher, Cipher decryptCipher)
 			throws FileNotFoundException {
 		if (encryptCipher == null && mode.contains("w")) {
@@ -35,34 +43,53 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 		currentSeek = 0;
 	}
 
+	/**
+	 * @see above
+	 * @param file the full qualified file path and name of the file
+	 */
 	public RandomChiperAccessFile(String file, String mode, Cipher encryptCipher, Cipher decryptCipher)
 			throws FileNotFoundException {
 		this(new File(file), mode, encryptCipher, decryptCipher);
 	}
 
 	@Override
+	/**
+	 * flushes the buffer and close the file
+	 */
 	public void close() throws IOException {
 		randomcipherAccessFileManaged.close();
 	}
 
 	@Override
+	/**
+	 * reads one byte from the file. If 0 it will return false, true otherwise
+	 */
 	public boolean readBoolean() throws IOException {
 		byte b = readByte();
 		return (b != 0);
 	}
 
 	@Override
+	/**
+	 * Reads one byte from the file
+	 */
 	public byte readByte() throws IOException {		
 		byte[] b = readFully(1);
 		return b[0];
 	}
 
 	@Override
+	/**
+	 * Reads one byte and converts it to char
+	 */
 	public char readChar() throws IOException {
 		return (char) readByte();
 	}
 
 	@Override
+	/**
+	 * Reads one Double with Big Endian order
+	 */
 	public double readDouble() throws IOException {
 		final ByteBuffer bb = readInByteBuffer(Double.BYTES);
 		bb.order(BYTE_ORDER);
@@ -70,6 +97,9 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 	}
 
 	@Override
+	/**
+	 * Reads one Float with Big Endian order
+	 */
 	public float readFloat() throws IOException {
 		final ByteBuffer bb = readInByteBuffer(Float.BYTES);
 		bb.order(BYTE_ORDER);
@@ -77,6 +107,9 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 	}
 
 	@Override
+	/**
+	 * Reads b.length and stores the byte in the files
+	 */
 	public void readFully(byte[] b) throws IOException {
 		byte[] read = readFully(currentSeek, b.length);
 
@@ -86,6 +119,9 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 	}
 
 	@Override
+	/**
+	 * Reads length bytes from the given offset and stores as much as fit in b
+	 */
 	public void readFully(byte[] b, int offset, int length) throws IOException {
 		byte[] read = readFully(offset, length);
 
@@ -95,10 +131,23 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 
 	}
 
+	/**
+	 * Reads length bytes and returns them 
+	 * @param length number of bytes to be read
+	 * @return An byte array containing the read data
+	 * @throws IOException 
+	 */
 	public byte[] readFully(int length) throws IOException {
 		return readFully(currentSeek, length);
 	}
 
+	/**
+	 * Reads length bytes at the given offset
+	 * @param offset the offset at which the file pointer should be placed
+	 * @param length number of bytes to be read
+	 * @return an byte array containing the read data
+	 * @throws IOException
+	 */
 	public byte[] readFully(long offset, int length) throws IOException {
 		try {
 			byte[] b =  randomcipherAccessFileManaged.read(offset, length);
@@ -110,6 +159,9 @@ public class RandomChiperAccessFile implements DataOutput, DataInput, Closeable 
 	}
 
 	@Override
+	/**
+	 * Reads an integer with Big Endian order
+	 */
 	public int readInt() throws IOException {
 		final ByteBuffer bb = readInByteBuffer(Integer.BYTES);
 		bb.order(BYTE_ORDER);
